@@ -109,6 +109,16 @@ async function modelPositions(page: Page) {
     (element as any)._cyreg.cy.nodes().map((node: any) => [node.id(), { ...node.position() }])));
 }
 
+async function cardInViewport(page: Page, id: string) {
+  return page.getByTestId('graph').evaluate((element, id) => {
+    const cy = (element as any)._cyreg.cy;
+    const node = cy.getElementById(id);
+    if (!node.length) return false;
+    const box = node.renderedBoundingBox();
+    return box.x1 >= 20 && box.y1 >= 20 && box.x2 <= cy.width() - 20 && box.y2 <= cy.height() - 20;
+  }, id);
+}
+
 async function dragFirstCard(page: Page) {
   const point = await canvasPosition(page, 'gid://gitlab/WorkItem/1');
   const box = (await page.getByTestId('graph').boundingBox())!;
@@ -322,6 +332,87 @@ test('collapses actual hierarchy children and retains isolated tickets', async (
   expect(await page.getByTestId('graph').evaluate(element => (element as any)._cyreg.cy.nodes().length)).toBe(8);
 });
 
+test('reveals an offscreen result at a readable scale and refocuses it with the keyboard without moving cards', async ({ page }) => {
+  await mockGitLab(page); await page.goto('/');
+  const id = fixtureIssue(2).id;
+  await canvasPosition(page, id);
+  const graph = page.getByTestId('graph');
+  await graph.evaluate((element, id) => {
+    const cy = (element as any)._cyreg.cy;
+    const node = cy.getElementById(id);
+    node.position({ x: 8000, y: 5000 }); node.emit('dragfree');
+  }, id);
+  const positions = await modelPositions(page);
+  const stored = await page.evaluate(() => JSON.stringify(localStorage));
+  expect(await cardInViewport(page, id)).toBe(false);
+  const result = results(page).getByRole('button', { name: /#2 Doing/ });
+  await result.click();
+  await expect(page.getByRole('textbox', { name: 'Titel', exact: true })).toHaveValue('Modell drehen');
+  await expect.poll(() => cardInViewport(page, id)).toBe(true);
+  const zoom = await graph.evaluate(element => (element as any)._cyreg.cy.zoom());
+  expect(zoom).toBeGreaterThanOrEqual(0.8);
+  expect(await modelPositions(page)).toEqual(positions);
+  expect(await page.evaluate(() => JSON.stringify(localStorage))).toBe(stored);
+
+  const pan = { x: 7000, y: 7000 };
+  await graph.evaluate((element, pan) => (element as any)._cyreg.cy.pan(pan), pan);
+  await page.getByRole('button', { name: 'Aktualisieren', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Aktualisieren', exact: true })).toBeEnabled();
+  expect(await graph.evaluate(element => (element as any)._cyreg.cy.pan())).toEqual(pan);
+  expect(await cardInViewport(page, id)).toBe(false);
+  await result.focus(); await page.keyboard.press('Enter');
+  await expect.poll(() => cardInViewport(page, id)).toBe(true);
+  expect(await modelPositions(page)).toEqual(positions);
+});
+
+test('keeps the camera and draft when a result selection is canceled', async ({ page }) => {
+  await mockGitLab(page); await page.goto('/'); await openFirst(page);
+  await expect.poll(() => cardInViewport(page, fixtureIssue(1).id)).toBe(true);
+  await page.getByRole('textbox', { name: 'Titel', exact: true }).fill('Unsaved title');
+  const graph = page.getByTestId('graph');
+  const before = await graph.evaluate(element => {
+    const cy = (element as any)._cyreg.cy;
+    return { pan: { ...cy.pan() }, zoom: cy.zoom() };
+  });
+  page.once('dialog', dialog => dialog.dismiss());
+  await results(page).getByRole('button', { name: /#4 Open Ohne Verbindungen/ }).click();
+  await expect(page.getByRole('textbox', { name: 'Titel', exact: true })).toHaveValue('Unsaved title');
+  const after = await graph.evaluate(element => {
+    const cy = (element as any)._cyreg.cy;
+    return { pan: { ...cy.pan() }, zoom: cy.zoom() };
+  });
+  expect(after).toEqual(before);
+  await expect(page).toHaveURL(/issue=1/);
+});
+
+test('reveals a collapsed hierarchy result at its saved position', async ({ page }) => {
+  await mockGitLab(page); await page.goto('/?view=hierarchy&issue=1');
+  const id = fixtureIssue(2).id;
+  await canvasPosition(page, id);
+  const graph = page.getByTestId('graph');
+  await graph.evaluate((element, id) => {
+    const cy = (element as any)._cyreg.cy;
+    const node = cy.getElementById(id);
+    node.position({ x: 8000, y: 5000 }); node.emit('dragfree');
+  }, id);
+  const positions = await modelPositions(page);
+  await page.getByRole('button', { name: 'Untertickets einklappen', exact: true }).click();
+  expect(await graph.evaluate((element, id) => (element as any)._cyreg.cy.getElementById(id).length, id)).toBe(0);
+  await results(page).getByRole('button', { name: /#2 Doing/ }).click();
+  await expect.poll(() => cardInViewport(page, id)).toBe(true);
+  expect(await modelPositions(page)).toEqual(positions);
+  await expect(page).not.toHaveURL(/collapsed=/);
+});
+
+test('opens the network map when a ticket result is selected in the theme overview', async ({ page }) => {
+  await mockGitLab(page); await page.goto('/?view=themes');
+  await canvasPosition(page, `theme:${labels[0].id}`);
+  await results(page).getByRole('button', { name: /#4 Open Ohne Verbindungen/ }).click();
+  await expect(page.getByRole('button', { name: 'Netz', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect.poll(() => cardInViewport(page, fixtureIssue(4).id)).toBe(true);
+  await expect(page.getByRole('textbox', { name: 'Titel', exact: true })).toHaveValue('Ohne Verbindungen');
+});
+
 test('saves a changed title and native status without replacing unrelated fields', async ({ page }) => {
   const mock = await mockGitLab(page);
   await page.goto('/'); await openFirst(page);
@@ -463,13 +554,20 @@ test('provides filters, results and editor without horizontal overflow on a phon
   await mockGitLab(page);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
+  await canvasPosition(page, fixtureIssue(1).id);
+  await page.getByTestId('graph').evaluate(element => {
+    const node = (element as any)._cyreg.cy.getElementById('gid://gitlab/WorkItem/1');
+    node.position({ x: 8000, y: 5000 }); node.emit('dragfree');
+  });
   await page.getByRole('button', { name: 'Filter', exact: true }).click();
   await page.getByRole('searchbox').fill('Treatment Viewer');
   await openFirst(page);
+  await expect.poll(() => cardInViewport(page, fixtureIssue(1).id)).toBe(true);
   await expect(page.getByRole('button', { name: 'Ticket schließen', exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.getByRole('button', { name: 'Ticket schließen', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Themen', exact: true })).toBeVisible();
+  expect(await cardInViewport(page, fixtureIssue(1).id)).toBe(true);
 });
 
 test('keeps titles on graph cards at all zoom levels and starts at a readable scale', async ({ page }) => {

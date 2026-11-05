@@ -106,7 +106,9 @@ need your local configuration or GitLab login.
   Values in one filter use OR; different filters use AND.
 - Enable **Direkte Nachbarn als Kontext** to retain one hop of filtered neighbors. External references remain
   non-editable links to GitLab.
-- The result list provides the same ticket selection with a keyboard. On a phone, open **Filter** to access the list.
+- Selecting a result by mouse or keyboard centers its card at a readable scale without moving any cards. Selecting
+  the same result again brings it back after panning away. Collapsed ancestors open as needed; selecting a ticket in
+  the theme overview opens the network map. On a phone, open **Filter** to access the result list.
 - Selecting a ticket highlights that card, its directly connected visible neighbors, and their connecting edges.
   Other cards and edges are dimmed. Relationship colors and arrow directions remain unchanged. This uses the current
   filters and view; enable neighbor context to show filtered neighbors. Close the ticket or tap empty canvas to clear

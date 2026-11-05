@@ -111,6 +111,10 @@ The default readable zoom is 0.85; the explicit overview fits all nodes without 
 Selection emphasizes the active card, its direct visible neighbors, and incident edges. Dim unrelated graph elements
 and their HTML controls together. Keep edge colors/directions and card status colors intact. Clearing selection
 restores normal contrast; selection does not rearrange the graph.
+Selecting a result centers that card at a readable scale after the inspector and map have resized. Focus only the
+selected card, not distant neighbors. A repeated result selection refocuses it; canceled draft navigation and GitLab
+refresh must not move the camera. Expand collapsed ancestors when needed. A ticket result in the theme overview opens
+the network map. Card coordinates remain unchanged.
 Pack disconnected components so isolated tickets do not form a single root row.
 Save node coordinates in browser storage per configured GitLab origin, project, and graph view, with a separate
 arrangement for each label theme. Do not mix layouts from different GitLab origins or projects.

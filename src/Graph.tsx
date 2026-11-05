@@ -16,6 +16,7 @@ interface Props {
   connect: (source: string, target: string) => void;
   create: (source: string, point: DropPosition) => void; labels: (iid: string) => void; start: (iid: string) => void;
   placement: { iid: string; point: DropPosition } | null;
+  focusRequest: { id: string } | null;
 }
 
 export const Graph = forwardRef<GraphHandle, Props>(function Graph(props, ref) {
@@ -90,6 +91,13 @@ export const Graph = forwardRef<GraphHandle, Props>(function Graph(props, ref) {
     if (!state.overview) readable();
   }
   function layout() { arrange(); remember(); }
+  function focus(id: string) {
+    const cy = core.current;
+    if (!cy) return;
+    cy.resize();
+    const node = cy.getElementById(id);
+    if (node.length) { cy.fit(node, 45); cy.zoom(Math.min(cy.zoom(), 1.3)); cy.center(node); }
+  }
   useImperativeHandle(ref, () => ({
     fit: () => { core.current?.fit(undefined, 45); },
     readable,
@@ -98,12 +106,7 @@ export const Graph = forwardRef<GraphHandle, Props>(function Graph(props, ref) {
       const node = issue && cy?.getElementById(issue.id);
       if (node?.length) latest.current.create(iid, { x: node.position('x') + node.width() + 80, y: node.position('y') + 80 });
     },
-    focus: id => {
-      const cy = core.current;
-      if (!cy) return;
-      const node = cy.getElementById(id);
-      if (node.length) { cy.fit(node.closedNeighborhood(), 90); cy.zoom(Math.min(cy.zoom(), 1.3)); cy.center(node); }
-    },
+    focus,
     zoom: factor => {
       const cy = core.current;
       if (cy) cy.zoom({ level: cy.zoom() * factor, renderedPosition: { x: cy.width() / 2, y: cy.height() / 2 } });
@@ -306,6 +309,15 @@ export const Graph = forwardRef<GraphHandle, Props>(function Graph(props, ref) {
   }, [props.workspace, props.matched, props.state, props.placement]);
 
   useEffect(() => { if (props.state.overview) core.current?.fit(undefined, 45); else readable(); }, [props.state.overview]);
+  useEffect(() => {
+    if (!props.focusRequest) return;
+    const id = props.focusRequest.id;
+    const frame = requestAnimationFrame(() => {
+      if (!latest.current.connecting && core.current?.getElementById(id).data('iid') === latest.current.state.selected)
+        focus(id);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [props.focusRequest]);
   useEffect(() => {
     const cy = core.current;
     if (!cy) return;

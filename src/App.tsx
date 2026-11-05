@@ -30,6 +30,7 @@ export function App() {
   const [createRequest, setCreateRequest] = useState<{ source?: string; point?: DropPosition } | null>(null);
   const [labelIid, setLabelIid] = useState('');
   const [placement, setPlacement] = useState<{ iid: string; point: DropPosition } | null>(null);
+  const [focusRequest, setFocusRequest] = useState<{ id: string } | null>(null);
   const graph = useRef<GraphHandle>(null);
   const pendingRefresh = useRef<Promise<void> | null>(null);
   const loadedTarget = useRef<string | null>(null);
@@ -85,9 +86,10 @@ export function App() {
       else if (connectionSource !== iid) setConnectionPair({ source: connectionSource, target: iid });
       return true;
     }
-    if (iid === state.selected) return true;
-    if (dirty && !window.confirm('Ungespeicherte Änderungen verwerfen und das Ticket wechseln?')) return false;
-    setDirty(false);
+    if (iid !== state.selected) {
+      if (dirty && !window.confirm('Ungespeicherte Änderungen verwerfen und das Ticket wechseln?')) return false;
+      setDirty(false);
+    }
     setState(current => {
       const ancestors = new Set<string>();
       const selectedId = workspace?.issues.find(issue => issue.iid === iid)?.id;
@@ -102,6 +104,14 @@ export function App() {
       return { ...current, selected: iid, collapsed: current.collapsed.filter(id => !ancestors.has(id)) };
     });
     return true;
+  }
+  function selectResult(issue: Issue) {
+    if (!select(issue.iid)) return;
+    setFiltersOpen(false);
+    if (connecting) return;
+    if (state.view === 'themes' && !state.theme)
+      setState(current => ({ ...current, view: 'network' }));
+    setFocusRequest({ id: issue.id });
   }
   function beginConnection(iid = state.selected) {
     if (state.selected && !select('')) return;
@@ -204,7 +214,7 @@ export function App() {
             {listOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}</button></div>
         {listOpen && <ul className="results-list" aria-label="Tickets">
           {results.map(issue => <li key={issue.id}><button className={state.selected === issue.iid ? 'selected' : ''}
-            aria-current={state.selected === issue.iid ? 'true' : undefined} onClick={() => { select(issue.iid); setFiltersOpen(false); }}>
+            aria-current={state.selected === issue.iid ? 'true' : undefined} onClick={() => selectResult(issue)}>
             <span className="result-meta"><span>#{issue.iid}</span><span><span className="status-dot" style={{ background: issue.status?.color ?? '#808080' }} />{issue.status?.name ?? issue.state}</span></span>
             <span className="result-title">{issue.title}</span>
           </button></li>)}
@@ -243,6 +253,7 @@ export function App() {
           {workspace && <Graph ref={graph} workspace={workspace} matched={matched} state={state} select={select}
             connecting={connecting} connectionSource={connectionSource}
             create={createFromCard} labels={editCardLabels} start={beginConnection} placement={placement}
+            focusRequest={focusRequest}
             connect={(source, target) => { if (source !== target) { setConnectionSource(source); setConnectionPair({ source, target }); } }}
             theme={theme => setState(current => ({ ...current, theme }))} />}
           {!workspace && <div className="graph-placeholder"><Network size={36} /><h3>{error ? 'GitLab ist gerade nicht erreichbar' : 'Deine Ticket-Landkarte entsteht'}</h3>
