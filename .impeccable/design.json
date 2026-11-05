@@ -1,0 +1,347 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-05T08:45:31.862Z",
+  "title": "Design System: GitLab Ticket Map",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Forest green",
+        "tonalRamp": [
+          "oklch(15% 0.0519 166.52)",
+          "oklch(26% 0.0519 166.52)",
+          "oklch(38% 0.0519 166.52)",
+          "oklch(49% 0.0519 166.52)",
+          "oklch(61% 0.0519 166.52)",
+          "oklch(72% 0.0519 166.52)",
+          "oklch(84% 0.0519 166.52)",
+          "oklch(95% 0.0519 166.52)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Surface",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(26% 0 0)",
+          "oklch(38% 0 0)",
+          "oklch(49% 0 0)",
+          "oklch(61% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(84% 0 0)",
+          "oklch(95% 0 0)"
+        ]
+      },
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Canvas",
+        "tonalRamp": [
+          "oklch(15% 0.0029 264.54)",
+          "oklch(26% 0.0029 264.54)",
+          "oklch(38% 0.0029 264.54)",
+          "oklch(49% 0.0029 264.54)",
+          "oklch(61% 0.0029 264.54)",
+          "oklch(72% 0.0029 264.54)",
+          "oklch(84% 0.0029 264.54)",
+          "oklch(95% 0.0029 264.54)"
+        ]
+      },
+      "background": {
+        "role": "neutral",
+        "displayName": "Background",
+        "tonalRamp": [
+          "oklch(15% 0.0029 264.54)",
+          "oklch(26% 0.0029 264.54)",
+          "oklch(38% 0.0029 264.54)",
+          "oklch(49% 0.0029 264.54)",
+          "oklch(61% 0.0029 264.54)",
+          "oklch(72% 0.0029 264.54)",
+          "oklch(84% 0.0029 264.54)",
+          "oklch(95% 0.0029 264.54)"
+        ]
+      },
+      "foreground": {
+        "role": "neutral",
+        "displayName": "Foreground",
+        "tonalRamp": [
+          "oklch(15% 0.0174 165.92)",
+          "oklch(26% 0.0174 165.92)",
+          "oklch(38% 0.0174 165.92)",
+          "oklch(49% 0.0174 165.92)",
+          "oklch(61% 0.0174 165.92)",
+          "oklch(72% 0.0174 165.92)",
+          "oklch(84% 0.0174 165.92)",
+          "oklch(95% 0.0174 165.92)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "tonalRamp": [
+          "oklch(15% 0.0146 171.94)",
+          "oklch(26% 0.0146 171.94)",
+          "oklch(38% 0.0146 171.94)",
+          "oklch(49% 0.0146 171.94)",
+          "oklch(61% 0.0146 171.94)",
+          "oklch(72% 0.0146 171.94)",
+          "oklch(84% 0.0146 171.94)",
+          "oklch(95% 0.0146 171.94)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Line",
+        "tonalRamp": [
+          "oklch(15% 0.0045 214.33)",
+          "oklch(26% 0.0045 214.33)",
+          "oklch(38% 0.0045 214.33)",
+          "oklch(49% 0.0045 214.33)",
+          "oklch(61% 0.0045 214.33)",
+          "oklch(72% 0.0045 214.33)",
+          "oklch(84% 0.0045 214.33)",
+          "oklch(95% 0.0045 214.33)"
+        ]
+      },
+      "selection": {
+        "role": "neutral",
+        "displayName": "Selection",
+        "tonalRamp": [
+          "oklch(15% 0.013 130.78)",
+          "oklch(26% 0.013 130.78)",
+          "oklch(38% 0.013 130.78)",
+          "oklch(49% 0.013 130.78)",
+          "oklch(61% 0.013 130.78)",
+          "oklch(72% 0.013 130.78)",
+          "oklch(84% 0.013 130.78)",
+          "oklch(95% 0.013 130.78)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "body": {
+        "displayName": "Body",
+        "purpose": "Use locally served IBM Plex Sans for the application."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Workspace heading."
+      },
+      "graph-card": {
+        "displayName": "Graph card",
+        "purpose": "Graph labels use IBM Plex Sans with a generic sans-serif fallback."
+      }
+    },
+    "shadows": [
+      {
+        "name": "temporary-filter-panel",
+        "value": "5px 6px 16px #26352d20",
+        "purpose": "Only the temporary filter panel uses a shadow."
+      }
+    ],
+    "motion": [
+      {
+        "name": "loading-line",
+        "value": "load 1.3s ease-in-out infinite alternate",
+        "purpose": "Loading indicator; the load keyframes translate from -90% to 190%."
+      },
+      {
+        "name": "refresh-indicator",
+        "value": "spin 1.8s linear infinite",
+        "purpose": "Refresh indicator; the spin keyframes rotate to 360deg."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "none",
+        "purpose": "Disable animation and use automatic scrolling when prefers-reduced-motion is reduce."
+      },
+      {
+        "name": "graph-layout",
+        "value": "none",
+        "purpose": "Graph layouts run without animation."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "wide-min",
+        "value": "1700px"
+      },
+      {
+        "name": "compact-max",
+        "value": "1250px"
+      },
+      {
+        "name": "tablet-max",
+        "value": "1000px"
+      },
+      {
+        "name": "phone-max",
+        "value": "700px"
+      }
+    ],
+    "graph": {
+      "cardModelWidth": 284,
+      "cardModelHeight": 224,
+      "labelFontSize": "14px",
+      "readableZoom": 0.85,
+      "overview": "Explicit fit-all view; titles and labels remain visible.",
+      "rendering": {
+        "canvas": "Card body, title, and edges.",
+        "htmlOverlay": "Number/status, open/label quick actions, colored label markers, and a right output port."
+      },
+      "readableAnchor": "Keep the anchor card and quick actions within the viewport, with a 40px margin."
+    },
+    "interaction": {
+      "coarsePointerQuery": "(pointer: coarse)",
+      "minimumTouchTarget": "44px",
+      "minimumTouchInputFontSize": "16px",
+      "hoverQuery": "(hover: hover) and (pointer: fine)",
+      "safeAreaPadding": "env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)",
+      "panelOverscrollBehavior": "contain",
+      "browserPageZoom": "available",
+      "canvasTouchAction": "none",
+      "cardControls": {
+        "minimumZoom": 0.5,
+        "clippedActions": "Hidden; removed from keyboard focus with tabIndex -1.",
+        "portDesktopSize": "30px",
+        "portCoarsePointerSize": "44px",
+        "portScale": "1 / Math.min(1, zoom)",
+        "markerLimit": "Three colored label markers with text; additional labels use a +count indicator."
+      },
+      "portDrop": {
+        "existingTicket": "Open the relationship dialog.",
+        "blankCanvas": "Open an explicit connected-card creation form.",
+        "invalidTarget": "Do not create on the source card, external references, or outside the canvas.",
+        "tapOrKeyboard": "Activate connection mode and offer Neue Karte as a creation alternative."
+      },
+      "connectedCreation": {
+        "default": "Create a real Task child under a source Issue.",
+        "alternative": "Create a related or directed blocking Issue; unsupported child sources default to a related Issue.",
+        "submit": "Create only after explicit form submission."
+      },
+      "quickLabels": "Read the current ticket and send only version-checked label additions/removals."
+    },
+    "layout": {
+      "desktopColumns": "252px minmax(0, 1fr)",
+      "desktopInspectorColumns": "252px minmax(0, 1fr) 360px"
+    },
+    "mouseInput": {
+      "pan": "Right-button dragging, including over cards",
+      "interaction": "Left-button card selection, movement and connections",
+      "backgroundLeftDrag": "Does not pan",
+      "touch": "Native one-finger pan and pinch zoom"
+    },
+    "graphLegend": {
+      "placement": "Disclosure in graph footer",
+      "examples": "A/B ticket cards with actual line, triangle, vee and diamond styles",
+      "semantics": [
+        "related without direction",
+        "blocker to blocked ticket",
+        "parent to child",
+        "duplicate to original"
+      ],
+      "touch": "44px summary target and scrollable panel",
+      "keyboard": "Enter opens; Escape closes and restores summary focus"
+    }
+  },
+  "components": [
+    {
+      "name": "Primary save button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Explicit save action below the inspector content.",
+      "html": "<button type=\"button\" class=\"ds-button-primary\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z\"/><path d=\"M17 21v-7H7v7M7 3v5h8\"/></svg>In GitLab speichern</button>",
+      "css": ".ds-button-primary{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:34px;border:1px solid var(--line,#dfe3e4);border-radius:6px;padding:6px 11px;color:#28332e;background:var(--surface,#ffffff);cursor:pointer;font-family:'IBM Plex Sans','Segoe UI',sans-serif;font-size:11px;background:var(--accent,#244b3c);border-color:var(--accent,#244b3c);color:#fff}@media(hover:hover) and (pointer:fine){.ds-button-primary:hover:not(:disabled){background:#173d2f;border-color:#b9c4ba}}.ds-button-primary:focus-visible{outline:3px solid #87a768;outline-offset:3px;}.ds-button-primary:disabled{opacity:.45;cursor:default}.ds-button-primary{touch-action:manipulation;user-select:none;-webkit-user-select:none}.ds-button-primary:active:not(:disabled){background:#173d2f}@media(pointer:coarse){.ds-button-primary{min-height:44px;}}"
+    },
+    {
+      "name": "Secondary discard button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Explicit discard action next to the save action.",
+      "html": "<button type=\"button\" class=\"ds-button-secondary\">Verwerfen</button>",
+      "css": ".ds-button-secondary{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:34px;border:1px solid var(--line,#dfe3e4);border-radius:6px;padding:6px 11px;color:#28332e;background:var(--surface,#ffffff);cursor:pointer;font-family:'IBM Plex Sans','Segoe UI',sans-serif;font-size:11px}@media(hover:hover) and (pointer:fine){.ds-button-secondary:hover:not(:disabled){background:#f0f3ef;border-color:#b9c4ba;}}.ds-button-secondary:focus-visible{outline:3px solid #87a768;outline-offset:3px;}.ds-button-secondary:disabled{opacity:.45;cursor:default}.ds-button-secondary{touch-action:manipulation;user-select:none;-webkit-user-select:none}.ds-button-secondary:active:not(:disabled){background:#e5ecdf}@media(pointer:coarse){.ds-button-secondary{min-height:44px;}}"
+    },
+    {
+      "name": "Icon button",
+      "kind": "button",
+      "refersTo": "button-icon",
+      "description": "Compact graph layout action with an accessible text label.",
+      "html": "<button type=\"button\" class=\"ds-button-icon\" aria-label=\"Graph neu anordnen\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 12a9 9 0 1 0 2.6-6.4L3 8\"/><path d=\"M3 3v5h5\"/></svg></button>",
+      "css": ".ds-button-icon{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:34px;border:1px solid var(--line,#dfe3e4);border-radius:6px;padding:6px 11px;color:#28332e;background:var(--surface,#ffffff);cursor:pointer;font-family:'IBM Plex Sans','Segoe UI',sans-serif;width:30px;min-height:30px;padding:4px;border:none;border-radius:5px;background:transparent;color:#59665f}@media(hover:hover) and (pointer:fine){.ds-button-icon:hover:not(:disabled){background:#f0f3ef;border-color:#b9c4ba;}}.ds-button-icon:focus-visible{outline:3px solid #87a768;outline-offset:3px;}.ds-button-icon:disabled{opacity:.45;cursor:default}.ds-button-icon{touch-action:manipulation;user-select:none;-webkit-user-select:none}.ds-button-icon:active:not(:disabled){background:#e5ecdf}@media(pointer:coarse){.ds-button-icon{min-height:44px;min-width:44px;}}"
+    },
+    {
+      "name": "Inspector text field",
+      "kind": "input",
+      "refersTo": "input-text",
+      "description": "Native text input for an editable ticket title.",
+      "html": "<label class=\"ds-field\">Titel<input type=\"text\" class=\"ds-text-input\" value=\"Ticket auswählen\" maxlength=\"1024\"></label>",
+      "css": ".ds-field{display:grid;gap:7px;color:#28332e;font-size:11px;font-weight:550;font-family:'IBM Plex Sans','Segoe UI',sans-serif;}.ds-text-input{width:100%;font-family:inherit;font-size:12px;font-weight:400;border:1px solid #cbd2ce;border-radius:5px;background:var(--surface,#ffffff);color:inherit;padding:8px 10px;accent-color:var(--accent,#244b3c);caret-color:var(--accent,#244b3c)}.ds-text-input:focus-visible{outline:3px solid #87a768;outline-offset:3px;}.ds-text-input::placeholder{color:#6c7772}.ds-text-input:disabled{color:#627069;background:#f4f5f4}@media(max-width:700px){.ds-text-input{font-size:16px}}@media(pointer:coarse){.ds-text-input{font-size:16px}}"
+    },
+    {
+      "name": "View switch",
+      "kind": "nav",
+      "refersTo": "view-switch",
+      "description": "Segmented buttons switch between network, theme, and hierarchy views.",
+      "html": "<div class=\"ds-view-switch\" aria-label=\"Ansicht\"><button type=\"button\" aria-pressed=\"true\">Netzwerk</button><button type=\"button\" aria-pressed=\"false\">Themen</button><button type=\"button\" aria-pressed=\"false\">Hierarchie</button></div>",
+      "css": ".ds-view-switch{display:inline-flex;padding:3px;border-radius:7px;background:#f0f2ef;gap:2px}.ds-view-switch button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:34px;border:1px solid var(--line,#dfe3e4);border-radius:6px;padding:6px 11px;color:#28332e;background:var(--surface,#ffffff);cursor:pointer;font-family:'IBM Plex Sans','Segoe UI',sans-serif;background:transparent;border-color:transparent;font-size:11px;min-height:29px;padding:5px 9px;gap:5px}.ds-view-switch button[aria-pressed=true]{background:var(--surface,#ffffff);border-color:#d6dcd4;color:var(--accent,#244b3c)}@media(hover:hover) and (pointer:fine){.ds-view-switch button:hover:not(:disabled){background:#f0f3ef;border-color:#b9c4ba;}}.ds-view-switch button:focus-visible{outline:3px solid #87a768;outline-offset:3px;}@media(max-width:700px){.ds-view-switch button{padding:5px 6px;font-size:10px;gap:4px}}.ds-view-switch button{touch-action:manipulation;user-select:none;-webkit-user-select:none}.ds-view-switch button:active:not(:disabled){background:#e5ecdf}@media(pointer:coarse){.ds-view-switch button{min-height:44px;}}"
+    },
+    {
+      "name": "Label choice",
+      "kind": "chip",
+      "refersTo": "label-choice",
+      "description": "Native checkbox within a label chip; the name accompanies its GitLab color.",
+      "html": "<label class=\"ds-label-choice\"><input type=\"checkbox\" checked><span class=\"ds-label-dot\"></span>Thema</label>",
+      "css": ".ds-label-choice{position:relative;display:inline-flex;align-items:center;gap:5px;padding:5px 7px;font-size:10px;border:1px solid #e1e6df;border-radius:4px;cursor:pointer;color:#65715f;font-family:'IBM Plex Sans','Segoe UI',sans-serif;}.ds-label-choice input{position:absolute;opacity:0;width:100%;height:100%;inset:0;cursor:pointer;margin:0}.ds-label-choice:focus-within{outline:2px solid #87a768;outline-offset:1px}.ds-label-choice:has(input:checked){color:#294a31;background:#edf3e8;border-color:#bdccaf}.ds-label-dot{display:inline-block;width:6px;height:6px;border-radius:50%;flex:0 0 auto;background:#808080}@media(max-width:700px){.ds-label-choice{font-size:11px;min-height:31px}}@media(pointer:coarse){.ds-label-choice{min-height:44px}}"
+    },
+    {
+      "name": "Ticket result",
+      "kind": "card",
+      "refersTo": "ticket-result",
+      "description": "Full-width result button provides a keyboard-accessible path to each ticket.",
+      "html": "<button type=\"button\" class=\"ds-ticket-result\" aria-current=\"true\"><span class=\"ds-result-meta\"><span>#123</span><span><span class=\"ds-status-dot\"></span>Offen</span></span><span class=\"ds-result-title\">Ticket auswählen</span></button>",
+      "css": ".ds-ticket-result{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:34px;border:1px solid var(--line,#dfe3e4);border-radius:6px;padding:6px 11px;color:#28332e;background:var(--surface,#ffffff);cursor:pointer;font-family:'IBM Plex Sans','Segoe UI',sans-serif;display:block;text-align:left;width:100%;padding:10px 8px;border-color:transparent;background:transparent;border-radius:5px}.ds-ticket-result[aria-current=true]{background:#eaf0e4;border-color:#d2ddc8}@media(hover:hover) and (pointer:fine){.ds-ticket-result:hover:not(:disabled){background:#f0f3ef;border-color:#b9c4ba;}}.ds-ticket-result:focus-visible{outline:3px solid #87a768;outline-offset:3px;}.ds-result-meta{display:flex;justify-content:space-between;gap:7px;font-size:10px;color:#66736c;margin-bottom:5px;font-variant-numeric:tabular-nums}.ds-result-meta>span:last-child{display:inline-flex;align-items:center;gap:5px}.ds-status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;flex:0 0 auto;background:#808080}.ds-result-title{display:block;font-size:11px;line-height:1.5;overflow-wrap:anywhere}.ds-ticket-result{touch-action:manipulation;user-select:none;-webkit-user-select:none}.ds-ticket-result:active:not(:disabled){background:#e5ecdf}@media(pointer:coarse){.ds-ticket-result{min-height:44px;}}"
+    },
+    {
+      "name": "Graph controls",
+      "kind": "custom",
+      "refersTo": "graph-controls",
+      "description": "Zoom, fit, and focus controls appear at the lower-right of the graph.",
+      "html": "<div class=\"ds-graph-controls\"><button type=\"button\" aria-label=\"Vergrößern\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14M12 5v14\"/></svg></button><button type=\"button\" aria-label=\"Verkleinern\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14\"/></svg></button><span></span><button type=\"button\" aria-label=\"Alles einpassen\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3\"/></svg></button><button type=\"button\" aria-label=\"Auf Auswahl fokussieren\" disabled><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"3\"/><path d=\"M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3\"/></svg></button></div>",
+      "css": ".ds-graph-controls{display:inline-flex;align-items:center;gap:1px;background:var(--surface,#ffffff);border:1px solid #d9dfd8;padding:4px;border-radius:7px}.ds-graph-controls button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:34px;border:1px solid var(--line,#dfe3e4);border-radius:6px;padding:6px 11px;color:#28332e;background:var(--surface,#ffffff);cursor:pointer;font-family:'IBM Plex Sans','Segoe UI',sans-serif;width:31px;min-height:30px;padding:5px;border:none}@media(hover:hover) and (pointer:fine){.ds-graph-controls button:hover:not(:disabled){background:#f0f3ef;border-color:#b9c4ba;}}.ds-graph-controls button:focus-visible{outline:3px solid #87a768;outline-offset:3px;}.ds-graph-controls button:disabled{opacity:.45;cursor:default}.ds-graph-controls>span{width:1px;height:18px;background:var(--line,#dfe3e4);margin:0 4px}.ds-graph-controls button{touch-action:manipulation;user-select:none;-webkit-user-select:none}.ds-graph-controls button:active:not(:disabled){background:#e5ecdf}@media(pointer:coarse){.ds-graph-controls button{min-height:44px;min-width:44px;}}"
+    },
+    {
+      "name": "Connection type choice",
+      "kind": "custom",
+      "description": "Native radio choices explain each relationship and its direction. Closing a duplicate requires a separate checkbox in the dialog.",
+      "html": "<fieldset class=\"ds-connection-kinds\"><legend>Was verbindet die Tickets?</legend><label class=\"ds-connection-kind\"><input type=\"radio\" name=\"ds-connection-kind\" value=\"relates_to\" checked><span><strong>Verwandt</strong><span>Die Tickets gehören zusammen. Keine Richtung, kein Statuswechsel.</span></span></label><label class=\"ds-connection-kind\"><input type=\"radio\" name=\"ds-connection-kind\" value=\"blocks\"><span><strong>Blockiert</strong><span>Das Ausgangsticket muss vor dem Zielticket erledigt werden.</span></span></label><label class=\"ds-connection-kind\"><input type=\"radio\" name=\"ds-connection-kind\" value=\"is_blocked_by\"><span><strong>Wird blockiert durch</strong><span>Das Zielticket muss vor dem Ausgangsticket erledigt werden.</span></span></label><label class=\"ds-connection-kind\"><input type=\"radio\" name=\"ds-connection-kind\" value=\"duplicate\"><span><strong>Duplikat von</strong><span>Das Ausgangsticket wird geschlossen. Das Zielticket bleibt das Original.</span></span></label></fieldset>",
+      "css": ".ds-connection-kinds{border:0;padding:0;margin:23px 0 18px;display:grid;gap:7px;color:#28332e;font-family:'IBM Plex Sans','Segoe UI',sans-serif}.ds-connection-kinds legend{font-size:13px;font-weight:550;margin-bottom:10px}.ds-connection-kind{display:flex;align-items:flex-start;gap:11px;border:1px solid var(--line,#dfe3e4);border-radius:7px;padding:13px;cursor:pointer}.ds-connection-kind:has(input:checked){background:#f0f5e9;border-color:#8da67b}.ds-connection-kind:has(input:disabled){opacity:.55;cursor:default}.ds-connection-kind input{margin:3px 0 0;accent-color:var(--accent,#244b3c);flex-shrink:0}.ds-connection-kind input:focus-visible{outline:3px solid #87a768;outline-offset:3px}.ds-connection-kind>span{display:grid;gap:4px}.ds-connection-kind strong{font-size:13px;font-weight:550}.ds-connection-kind>span>span{font-size:12px;line-height:1.6;color:var(--muted,#66716d)}"
+    },
+    {
+      "name": "Card output port and label marker",
+      "kind": "custom",
+      "description": "Native HTML overlay at 1x card size. The graph renders the card body and title; the output port keeps its target size when zooming out. Hide clipped actions and remove keyboard focus.",
+      "html": "<div class=\"ds-card-controls\" aria-label=\"Kartenaktionen\"><div class=\"ds-card-status\"><strong>#123</strong><i></i>Offen</div><div class=\"ds-card-markers\"><span class=\"ds-card-label\" title=\"Thema\"><i></i>Thema</span></div><button type=\"button\" class=\"ds-card-port\" aria-label=\"Verbindung von #123 ziehen\" title=\"Ziehen: verbinden oder neue Unteraufgabe anlegen\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m10 13 3.5-3.5a5 5 0 0 1 7.1 7.1l-3 3a5 5 0 0 1-7.1 0\"/><path d=\"m14 11-3.5 3.5a5 5 0 0 1-7.1-7.1l3-3a5 5 0 0 1 7.1 0\"/></svg></button></div>",
+      "css": ".ds-card-controls{position:relative;width:284px;height:224px;font-family:'IBM Plex Sans','Segoe UI',sans-serif;pointer-events:none}.ds-card-status{position:absolute;top:14px;left:12px;max-width:155px;display:flex;gap:6px;align-items:center;color:#51634b;font-size:11px;white-space:nowrap;overflow:hidden}.ds-card-status strong{font-weight:600}.ds-card-status i,.ds-card-label i{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:#87928e}.ds-card-markers{position:absolute;bottom:10px;left:12px;right:12px;display:flex;align-items:center;gap:4px;overflow:hidden}.ds-card-label{display:inline-flex;align-items:center;gap:4px;font-size:10px;white-space:nowrap;max-width:85px;overflow:hidden;text-overflow:ellipsis;padding:3px 5px;background:#f0f3ed;border-radius:4px;color:#45583e}.ds-card-port{position:absolute;right:0;top:50%;display:inline-flex;align-items:center;justify-content:center;width:30px;min-width:30px;height:30px;min-height:30px;padding:4px;border:1px solid #90a67b;background:#f2f7eb;color:var(--accent,#244b3c);border-radius:50%;transform:translate(50%,-50%) scale(var(--action-scale,1));transform-origin:center;pointer-events:auto;cursor:crosshair;touch-action:none}.ds-card-port:focus-visible{outline:3px solid #87a768;outline-offset:3px}.ds-card-port:disabled{opacity:.45;cursor:default}.ds-card-port:active:not(:disabled){background:#e5ecdf}@media(hover:hover) and (pointer:fine){.ds-card-port:hover:not(:disabled){background:#f0f3ef;border-color:#b9c4ba}}@media(pointer:coarse){.ds-card-port{width:44px;min-width:44px;height:44px;min-height:44px}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "A restrained, light workspace for continuous project work.",
+    "overview": "A restrained, light workspace for continuous project work. Use a forest-green action accent, neutral panels,\nand native GitLab status colors. The graph is the working surface, not a decorative illustration.",
+    "keyCharacteristics": [
+      "Desktop uses a filter/result sidebar and a flexible graph. The inspector adds a third column only when a ticket is open.",
+      "Graph nodes are 284 by 224 model pixels and always include titles and labels.\nThe default readable zoom is 0.85; the explicit overview fits all nodes without substituting compact labels.\nPack disconnected components so isolated tickets do not form a single root row.\nHTML controls follow the graph camera: number/status at the top left, open/label actions at the top right, colored\nlabel markers at the bottom, and a round output port centered on the right edge. The port stays at a stable physical\nsize while zooming. Hide actions below zoom 0.5 and when clipped; keep them out of keyboard focus then.\nDrop on a card to choose its relationship; drop on blank canvas to create a connected card, defaulting to a Task.\nThe creation form and quick label dialog use the same native dialog, explicit-save, and draft-protection conventions.",
+      "Connection mode supports two-tap selection, drawing, and target search. Source and target receive the same restrained\ngreen selection treatment. The native dialog explains direction and requires a separate checkbox before closing\na duplicate. Purple dotted arrows point from a duplicate to its original. Never report a write as successful before\nthe GitLab result is read back and verified.",
+      "On coarse-pointer devices, controls have a minimum 44-pixel target, inputs use at least 16-pixel text, and hover styles\ndo not persist after tapping. Keep browser page zoom available; reserve canvas gestures for graph pan and pinch.\nFor a mouse, reserve right-button dragging for camera panning and left-button input for card interaction and connections.\nKeep native one-finger pan and pinch on touch input, including hybrid touch/mouse devices.\nApply safe-area padding and contain overscroll within each panel. Test real-device behavior separately from emulation."
+    ],
+    "rules": [],
+    "dos": [
+      "Keep the viewport stable when selecting a ticket or changing its text.",
+      "Emphasize the selected card, its direct visible neighbors, and incident edges. Dim unrelated cards and their HTML controls together. Preserve edge colors and directions. Restore normal contrast when selection is cleared.",
+      "Restore each view's saved browser arrangement, with a separate arrangement for each label theme. Filters and GitLab refresh preserve known card positions. Place only unseen cards; move known cards by dragging or the explicit layout action. Show storage failures and unreadable saved positions in a persistent notice.",
+      "Retain visible errors and unsaved text until the user resolves them."
+    ],
+    "donts": [
+      "Do not imply that a label cluster is a GitLab parent-child structure.",
+      "Do not use color alone to express status or make canvas interaction the only navigation path."
+    ]
+  }
+}
