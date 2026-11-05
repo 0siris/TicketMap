@@ -1,8 +1,8 @@
-# TicketPortal Agent Guide
+# TicketMap Agent Guide
 
 ## Scope and purpose
 
-These instructions apply to this repository. TicketPortal is a local web application for one configurable
+These instructions apply to this repository. TicketMap is a local web application for one configurable
 GitLab project. Read [README.md](README.md) for setup and behavior, [PRODUCT.md](PRODUCT.md) for scope, and
 [DESIGN.md](DESIGN.md) for UI rules.
 Use English for source comments and technical documentation. UI text is German.

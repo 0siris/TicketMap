@@ -1,4 +1,4 @@
-# TicketPortal
+# TicketMap
 
 A local visual workspace for a GitLab project that you configure. Explore tickets, labels, dependencies,
 and parent-child relationships. Edit a ticket without leaving the graph. The repository contains no deployment target.
@@ -12,8 +12,8 @@ Copy the source repository's clone URL from GitHub and replace `<repository-url>
 For an existing checkout, start with the `cd` command.
 
 ```powershell
-git clone <repository-url> TicketPortal
-cd TicketPortal
+git clone <repository-url> TicketMap
+cd TicketMap
 npm ci
 ```
 
