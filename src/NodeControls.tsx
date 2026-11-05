@@ -49,16 +49,17 @@ export function NodeControls({ cy, surface, issues, connect, create, labels, ope
         frame = 0;
         setNodes(cy.nodes('.ticket').map(node => ({ id: node.id(), iid: node.data('iid'), ...node.position(),
           width: node.width(), height: node.height(), context: node.hasClass('context'),
-          muted: node.hasClass('selection-muted'), emphasized: node.hasClass('selected') || node.hasClass('selection-neighbor') })));
+          muted: node.hasClass('selection-muted') && !node.selected(),
+          emphasized: node.selected() || node.hasClass('selected') || node.hasClass('selection-neighbor') })));
         viewport();
       });
     };
     const escape = (event: KeyboardEvent) => { if (event.key === 'Escape') cancel(); };
-    cy.on('pan zoom resize', viewport); cy.on('position add remove layoutstop class', positions);
+    cy.on('pan zoom resize', viewport); cy.on('position add remove layoutstop class select unselect', positions);
     window.addEventListener('blur', cancel); window.addEventListener('keydown', escape);
     refreshFocus.current = viewport; positions(); viewport();
     return () => { cancelAnimationFrame(frame); cancel(); cy.off('pan zoom resize', viewport);
-      cy.off('position add remove layoutstop class', positions);
+      cy.off('position add remove layoutstop class select unselect', positions);
       window.removeEventListener('blur', cancel); window.removeEventListener('keydown', escape); refreshFocus.current = null; };
   }, [cy]);
   useLayoutEffect(() => { refreshFocus.current?.(); }, [nodes, issues, showActions]);

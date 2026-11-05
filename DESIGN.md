@@ -108,9 +108,15 @@ with asynchronous decoding, a loading or error message, useful alt text, and a G
 require an explicit load action. Linked images keep their original link without nested controls.
 Graph nodes are 284 by 224 model pixels and always include titles and labels.
 The default readable zoom is 0.85; the explicit overview fits all nodes without substituting compact labels.
-Selection emphasizes the active card, its direct visible neighbors, and incident edges. Dim unrelated graph elements
-and their HTML controls together. Keep edge colors/directions and card status colors intact. Clearing selection
+Inspector selection emphasizes the active card, its direct visible neighbors, and incident edges. Dim unrelated graph
+elements and their HTML controls together. Keep edge colors/directions and card status colors intact. Clearing selection
 restores normal contrast; selection does not rearrange the graph.
+Desktop group selection uses the graph's native selection state. A left-button rectangle selects ticket cards;
+Ctrl adds to a rectangle selection and toggles individual cards. Distinguish selected group members from inspector
+neighbors and keep their HTML controls in the same contrast state. Show the selection count and a clear action.
+Dragging a group member moves all selected tickets by the same delta and saves their coordinates at the end.
+Keep group selection separate from the active inspector and its draft. Clear it on explicit clear, eligible Escape,
+view/filter/collapse changes, and connection-mode changes. Retain it during data refresh, but do not persist it.
 Selecting a result centers that card at a readable scale after the inspector and map have resized. Focus only the
 selected card, not distant neighbors. A repeated result selection refocuses it; canceled draft navigation and GitLab
 refresh must not move the camera. Expand collapsed ancestors when needed. A ticket result in the theme overview opens
@@ -145,7 +151,8 @@ the GitLab result is read back and verified.
 
 On coarse-pointer devices, controls have a minimum 44-pixel target, inputs use at least 16-pixel text, and hover styles
 do not persist after tapping. Keep browser page zoom available; reserve canvas gestures for graph pan and pinch.
-For a mouse, reserve right-button dragging for camera panning and left-button input for card interaction and connections.
+For a mouse, reserve right-button dragging for camera panning. Left-button dragging on empty canvas draws a selection
+rectangle; dragging a selected card moves the group. Connection mode retains its existing left-button drawing.
 Keep native one-finger pan and pinch on touch input, including hybrid touch/mouse devices.
 Use Cytoscape wheel sensitivity 6 with native device normalization for a direct response to each wheel step.
 Convert line-mode wheel events to pixel deltas before Cytoscape handles them; keep pixel and touch input native.

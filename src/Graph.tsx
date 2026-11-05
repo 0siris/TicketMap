@@ -11,7 +11,7 @@ export interface GraphHandle { fit(): void; readable(): void; focus(id: string):
   layout(): void; createChild(iid: string): void }
 interface Props {
   workspace: Workspace; matched: Issue[]; state: ViewState;
-  select: (iid: string) => void; theme: (id: string) => void;
+  select: (iid: string) => boolean; theme: (id: string) => void;
   connecting: boolean; connectionSource: string;
   connect: (source: string, target: string) => void;
   create: (source: string, point: DropPosition) => void; labels: (iid: string) => void; start: (iid: string) => void;
@@ -25,9 +25,11 @@ export const Graph = forwardRef<GraphHandle, Props>(function Graph(props, ref) {
   const [overlayCore, setOverlayCore] = useState<Core | null>(null);
   const core = useRef<Core | null>(null);
   const [storageNotice, setStorageNotice] = useState('');
+  const [selectionCount, setSelectionCount] = useState(0);
   const positions = useRef<GraphPositions | null>(null);
   if (!positions.current) positions.current = new GraphPositions(setStorageNotice);
   const activeView = useRef('');
+  const selectionScope = useRef('');
   const appliedPlacement = useRef<Props['placement']>(null);
   const latest = useRef(props);
   latest.current = props;
@@ -91,6 +93,14 @@ export const Graph = forwardRef<GraphHandle, Props>(function Graph(props, ref) {
     if (!state.overview) readable();
   }
   function layout() { arrange(); remember(); }
+  function inspect(iid: string) {
+    if (!latest.current.select(iid)) return false;
+    const cy = core.current;
+    cy?.nodes(':selected').unselect();
+    const issue = latest.current.workspace.issues.find(issue => issue.iid === iid);
+    if (issue) cy?.getElementById(issue.id).select();
+    return true;
+  }
   function focus(id: string) {
     const cy = core.current;
     if (!cy) return;
@@ -115,7 +125,7 @@ export const Graph = forwardRef<GraphHandle, Props>(function Graph(props, ref) {
   useEffect(() => {
     const removeWheelNormalization = installWheelNormalization(container.current!);
     const cy = cytoscape({ container: container.current!, elements: [], minZoom: 0.05, maxZoom: 2.5,
-      wheelSensitivity: 6, selectionType: 'single', boxSelectionEnabled: false, touchTapThreshold: 12,
+      wheelSensitivity: 6, selectionType: 'single', boxSelectionEnabled: true, touchTapThreshold: 12,
       style: [
         { selector: 'node', style: {
           'shape': 'round-rectangle', 'width': 284, 'height': 224, 'background-color': '#ffffff',
@@ -132,6 +142,8 @@ export const Graph = forwardRef<GraphHandle, Props>(function Graph(props, ref) {
           'background-color': '#edf4e7', 'opacity': 1, 'z-index': 5 } },
         { selector: 'node.selection-neighbor', style: { 'border-width': 3, 'background-color': '#f1f6ea', 'opacity': 1, 'z-index': 4 } },
         { selector: 'node.selection-muted', style: { 'opacity': 0.22 } },
+        { selector: 'node.ticket:selected', style: { 'border-width': 4, 'border-color': '#3575ac',
+          'background-color': '#eaf3fb', 'opacity': 1, 'z-index': 6 } },
         { selector: 'edge', style: { 'width': 1.6, 'line-color': '#9ba8b2', 'curve-style': 'bezier',
           'target-arrow-color': '#9ba8b2', 'arrow-scale': 1.1, 'overlay-opacity': 0 } },
         { selector: 'edge.blocks', style: { 'line-color': '#b4543e', 'target-arrow-color': '#b4543e',
@@ -150,14 +162,30 @@ export const Graph = forwardRef<GraphHandle, Props>(function Graph(props, ref) {
       ],
     });
     core.current = cy;
-    cy.on('dragfree', 'node', remember);
+    let savePending = false;
+    cy.on('dragfree', 'node', () => {
+      if (savePending) return;
+      savePending = true;
+      queueMicrotask(() => { savePending = false; if (!cy.destroyed()) remember(); });
+    });
+    cy.on('select unselect remove', () => setSelectionCount(cy.nodes('.ticket:selected').length));
     setOverlayCore(cy);
-    const removeMousePanning = installMousePanning(surface.current!, cy);
+    const removeMousePanning = installMousePanning(surface.current!, cy, () =>
+      !latest.current.connecting && !(latest.current.state.view === 'themes' && !latest.current.state.theme));
     const coarse = window.matchMedia('(pointer: coarse)');
-    const grabbing = () => cy.autoungrabify(coarse.matches || latest.current.connecting);
+    const grabbing = () => {
+      cy.autoungrabify(coarse.matches || latest.current.connecting);
+      cy.boxSelectionEnabled(!coarse.matches && !latest.current.connecting);
+    };
     coarse.addEventListener('change', grabbing); grabbing();
     let gesture: { source: string; id: string; start: { x: number; y: number }; moved: boolean } | null = null;
     let suppressTapUntil = 0;
+    let previousSelection = cy.nodes(':selected');
+    cy.on('mousedown', () => { previousSelection = cy.nodes(':selected'); });
+    const restoreSelection = () => queueMicrotask(() => {
+      if (cy.destroyed()) return;
+      cy.nodes(':selected').unselect(); previousSelection.filter(node => !node.removed()).select();
+    });
     const clearGesture = () => {
       cy.elements('.connection-preview, .connection-cursor').remove();
       cy.nodes().removeClass('connection-target');
@@ -200,22 +228,32 @@ export const Graph = forwardRef<GraphHandle, Props>(function Graph(props, ref) {
     cy.on('tap', 'node', event => {
       const data = event.target.data();
       if (performance.now() < suppressTapUntil) return;
+      const mouse = event.originalEvent as MouseEvent;
+      if (!latest.current.connecting && mouse.type !== 'touchend' && (mouse.ctrlKey || mouse.metaKey || mouse.shiftKey)) return;
       if (data.theme) latest.current.theme(data.theme);
       else if (data.external) {
         const url = safeGitLabUrl(data.webUrl, latest.current.workspace.gitlabUrl);
         if (url) window.open(url, '_blank', 'noopener,noreferrer');
       } else if (latest.current.connecting) {
         if (data.canLink) latest.current.select(data.iid);
-      } else latest.current.select(data.iid);
+      } else if (!inspect(data.iid)) restoreSelection();
     });
     cy.on('tap', event => {
-      if (event.target === cy && latest.current.state.selected && !latest.current.connecting)
-        latest.current.select('');
+      const mouse = event.originalEvent as MouseEvent;
+      if (event.target === cy && latest.current.state.selected && !latest.current.connecting &&
+          !(mouse.ctrlKey || mouse.metaKey || mouse.shiftKey) && !inspect('')) restoreSelection();
     });
+    const escape = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement;
+      if (event.key === 'Escape' && !document.querySelector('dialog[open]') &&
+          !target.closest('input, textarea, select, [contenteditable=true]')) cy.nodes(':selected').unselect();
+    };
+    window.addEventListener('keydown', escape);
     const observer = new ResizeObserver(() => cy.resize());
     observer.observe(container.current!);
     return () => { observer.disconnect(); removeMousePanning(); removeWheelNormalization(); coarse.removeEventListener('change', grabbing);
       container.current?.removeEventListener('touchstart', multitouch);
+      window.removeEventListener('keydown', escape);
       cy.destroy(); core.current = null; activeView.current = ''; };
   }, []);
 
@@ -231,6 +269,7 @@ export const Graph = forwardRef<GraphHandle, Props>(function Graph(props, ref) {
       elements = workspace.labels.filter(label => counts.has(label.id)).map(label => ({
         data: { id: `theme:${label.id}`, theme: label.id, color: label.color,
           label: `${label.name}\n${counts.get(label.id)} Tickets` }, classes: 'theme',
+        selectable: false,
       }));
     } else {
       const graph = visibleGraph(workspace, matched, state);
@@ -243,10 +282,16 @@ export const Graph = forwardRef<GraphHandle, Props>(function Graph(props, ref) {
           classes: `ticket ${!graph.matchIds.has(issue.id) ? 'context' : ''}` };
       });
       const references: ElementDefinition[] = graph.references.map(item => ({ data: { ...item, external: true,
-        color: '#a4adb3', shortLabel: `Extern\n#${item.iid}`, label: `Extern · #${item.iid}\n${item.title.slice(0, 80)}` }, classes: 'external context' }));
-      elements = [...nodes, ...references, ...graph.relations.map(edge => ({ data: { ...edge }, classes: edge.kind }))];
+        color: '#a4adb3', shortLabel: `Extern\n#${item.iid}`, label: `Extern · #${item.iid}\n${item.title.slice(0, 80)}` },
+        classes: 'external context', selectable: false }));
+      elements = [...nodes, ...references, ...graph.relations.map(edge => ({ data: { ...edge }, classes: edge.kind,
+        selectable: false }))];
     }
     const key = positionKey(workspace.project, state, workspace.gitlabUrl);
+    const scope = JSON.stringify([key, state.filters, state.collapsed]);
+    if (selectionScope.current !== scope) {
+      cy.nodes(':selected').unselect(); selectionScope.current = scope;
+    }
     const switched = activeView.current !== key;
     const saved = positions.current!.read(key);
     activeView.current = key;
@@ -314,7 +359,9 @@ export const Graph = forwardRef<GraphHandle, Props>(function Graph(props, ref) {
     const id = props.focusRequest.id;
     const frame = requestAnimationFrame(() => {
       if (!latest.current.connecting && core.current?.getElementById(id).data('iid') === latest.current.state.selected)
-        focus(id);
+      {
+        core.current.nodes(':selected').unselect(); core.current.getElementById(id).select(); focus(id);
+      }
     });
     return () => cancelAnimationFrame(frame);
   }, [props.focusRequest]);
@@ -322,6 +369,9 @@ export const Graph = forwardRef<GraphHandle, Props>(function Graph(props, ref) {
     const cy = core.current;
     if (!cy) return;
     cy.autoungrabify(window.matchMedia('(pointer: coarse)').matches || props.connecting);
+    cy.boxSelectionEnabled(!window.matchMedia('(pointer: coarse)').matches && !props.connecting);
+    if (props.connecting) cy.nodes(':selected').unselect();
+    cy.autounselectify(props.connecting);
     cy.nodes().removeClass('connection-source');
     const source = props.workspace.issues.find(issue => issue.iid === props.connectionSource);
     if (props.connecting && source) cy.getElementById(source.id).addClass('connection-source');
@@ -332,7 +382,11 @@ export const Graph = forwardRef<GraphHandle, Props>(function Graph(props, ref) {
     <div ref={container} className="graph-canvas" role="img"
       aria-label="Interaktiver Ticketgraph. Alle Tickets sind auch über die Ergebnisliste erreichbar." data-testid="graph" />
     {storageNotice && <div className="graph-storage-notice action-notice" role="status">{storageNotice}</div>}
+    {selectionCount > 1 && <div className="graph-selection-notice" role="status">
+      <span>{selectionCount} Tickets ausgewählt</span>
+      <button onClick={() => core.current?.nodes(':selected').unselect()}>Auswahl aufheben</button>
+    </div>}
     {overlayCore && surface.current && <NodeControls cy={overlayCore} surface={surface.current} issues={props.workspace.issues}
-      connect={props.connect} create={props.create} labels={props.labels} open={props.select} start={props.start} />}
+      connect={props.connect} create={props.create} labels={props.labels} open={inspect} start={props.start} />}
   </div>;
 });

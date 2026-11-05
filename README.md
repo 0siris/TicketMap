@@ -109,7 +109,8 @@ need your local configuration or GitLab login.
 - Selecting a result by mouse or keyboard centers its card at a readable scale without moving any cards. Selecting
   the same result again brings it back after panning away. Collapsed ancestors open as needed; selecting a ticket in
   the theme overview opens the network map. On a phone, open **Filter** to access the result list.
-- Selecting a ticket highlights that card, its directly connected visible neighbors, and their connecting edges.
+- Opening a ticket in the inspector highlights that card, its directly connected visible neighbors, and their
+  connecting edges.
   Other cards and edges are dimmed. Relationship colors and arrow directions remain unchanged. This uses the current
   filters and view; enable neighbor context to show filtered neighbors. Close the ticket or tap empty canvas to clear
   the selection. An unsaved draft still requires confirmation before it is discarded.
@@ -205,8 +206,14 @@ ticket number is known, the error identifies it and asks the user not to recreat
 
 Touch controls use at least 44-pixel action targets and 16-pixel input text. The graph handles pan and pinch gestures;
 touch users pan the canvas instead of moving ticket positions. Hover styling is limited to devices with a fine hover pointer.
-On desktop, hold the right mouse button to pan, including when starting over a card. The left button selects or moves
-cards and draws connections in connection mode; dragging empty space with the left button does not pan.
+On desktop, drag empty canvas with the left mouse button to select ticket cards with a rectangle. Hold **Ctrl** while
+dragging to add cards, or **Ctrl-click** a ticket to add or remove it. Drag any selected card to move the selected group
+together. Relative spacing stays unchanged, and the new coordinates are saved when the drag ends.
+Group selection is temporary and does not change the inspector or write to GitLab. A normal card click still opens one
+ticket with the existing draft protection. Click empty canvas or choose **Auswahl aufheben** to clear the group.
+**Esc** also clears the group outside text fields and dialogs. View, filter, hierarchy-collapse, and connection-mode
+changes clear the group; a data refresh retains it. The group itself is not restored after a page reload.
+Hold the right mouse button to pan, including when starting over a card. Connection mode retains left-button drawing.
 The graph suppresses the browser context menu for right-button navigation. Mouse wheel zoom uses Cytoscape's native
 device normalization with sensitivity 6. A standard wheel step zooms about 18% after device detection; the first four
 steps zoom about 32%. Line-based browser wheel events are converted at 16 pixels per line before device detection.

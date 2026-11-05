@@ -1,6 +1,6 @@
 import type { Core } from 'cytoscape';
 
-export function installMousePanning(element: HTMLElement, cy: Core): () => void {
+export function installMousePanning(element: HTMLElement, cy: Core, canSelect: () => boolean): () => void {
   let drag: { pointerId: number; x: number; y: number; pan: { x: number; y: number } } | null = null;
   const previousCursor = element.style.cursor;
   const stop = () => {
@@ -8,8 +8,9 @@ export function installMousePanning(element: HTMLElement, cy: Core): () => void 
     drag = null; element.style.cursor = previousCursor; cy.userPanningEnabled(true);
   };
   const down = (event: PointerEvent) => {
+    cy.boxSelectionEnabled(event.pointerType === 'mouse' && canSelect());
     if (event.pointerType !== 'mouse') { cy.userPanningEnabled(true); return; }
-    // Mouse navigation uses the right button; touch keeps Cytoscape's native pan and pinch.
+    // Left background drags select a box; the right button pans. Touch keeps native pan and pinch.
     cy.userPanningEnabled(false);
     if (event.button !== 2) return;
     drag = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, pan: { ...cy.pan() } };

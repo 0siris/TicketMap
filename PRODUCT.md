@@ -20,6 +20,9 @@ project, graph view, and label theme has its own arrangement. Filters preserve h
 rearrange known cards.
 The explicit layout action saves a new arrangement for visible cards. Layout storage contains only IDs and coordinates,
 with no shared or cross-device layout service. Storage failures show a notice and keep the current map usable.
+Desktop users can select ticket cards with a rectangle, add or remove cards with Ctrl-click, and drag the group together.
+Group movement preserves relative spacing and saves coordinates. This temporary selection is separate from the active
+ticket inspector and does not make bulk changes in GitLab.
 Users connect tickets with two taps, mouse/touch dragging, or a target search. A dialog chooses related, blocking,
 blocked-by, or duplicate semantics. A real duplicate action requires explicit confirmation before it closes the source.
 Every readable card has a direct connection port, colored label markers, and open/label quick actions.

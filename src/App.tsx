@@ -273,7 +273,7 @@ export function App() {
           </div>}
         </div>
         <footer className="graph-footer"><GraphLegend />
-          <span className="graph-hint">{state.view === 'themes' && !state.theme ? 'Thema auswählen, um Tickets zu sehen' : 'Rechts ziehen: verschieben · Links: interagieren · Touch: schieben & zoomen'}</span></footer>
+          <span className="graph-hint">{state.view === 'themes' && !state.theme ? 'Thema auswählen, um Tickets zu sehen' : 'Links ziehen: Auswahlrechteck · Strg+Klick: Auswahl erweitern · Rechts ziehen: schieben'}</span></footer>
       </section>
       {state.selected && workspace ? <Editor key={state.selected} iid={state.selected} workspace={workspace} close={() => select('')}
         select={select} dirty={markDirty} saved={saved} connect={beginConnection} /> : null}

@@ -128,6 +128,129 @@ async function dragFirstCard(page: Page) {
   await page.mouse.up();
 }
 
+async function arrangeSelectionCards(page: Page) {
+  await canvasPosition(page, fixtureIssue(1).id);
+  await page.getByTestId('graph').evaluate(element => {
+    const cy = (element as any)._cyreg.cy;
+    cy.nodes('.ticket').forEach((node: any, index: number) => node.position({
+      x: 220 + (index % 3) * 330, y: index < 3 ? 200 : 520 + Math.floor((index - 3) / 3) * 300,
+    }));
+    cy.zoom(0.8); cy.pan({ x: 0, y: 0 }); cy.nodes().first().emit('dragfree');
+  });
+  return (await page.getByTestId('graph').boundingBox())!;
+}
+
+async function boxSelectFirstPair(page: Page) {
+  const box = (await page.getByTestId('graph').boundingBox())!;
+  await page.mouse.move(box.x + 40, box.y + 40);
+  await page.mouse.down();
+  await page.mouse.move(box.x + 560, box.y + 275, { steps: 12 });
+  await page.mouse.up();
+}
+
+async function selectedTickets(page: Page) {
+  return page.getByTestId('graph').evaluate(element => (element as any)._cyreg.cy.nodes(':selected')
+    .map((node: any) => node.data('iid')).sort());
+}
+
+test('selects a rectangle, adds and toggles tickets with Control, and moves the group persistently', async ({ page }) => {
+  const mock = await mockGitLab(page); await page.goto('/');
+  const box = await arrangeSelectionCards(page);
+  const before = await modelPositions(page);
+  await boxSelectFirstPair(page);
+  await expect.poll(() => selectedTickets(page)).toEqual(['1', '2']);
+  await expect(page.getByText('2 Tickets ausgewählt', { exact: true })).toBeVisible();
+  await expect(page.getByRole('textbox', { name: 'Titel', exact: true })).toHaveCount(0);
+  await page.keyboard.down('Control');
+  await page.mouse.click(box.x + 704, box.y + 160);
+  await expect.poll(() => selectedTickets(page)).toEqual(['1', '2', '3']);
+  await page.mouse.click(box.x + 440, box.y + 160);
+  await expect.poll(() => selectedTickets(page)).toEqual(['1', '3']);
+  await page.mouse.click(box.x + 440, box.y + 160);
+  await page.keyboard.up('Control');
+  await expect.poll(() => selectedTickets(page)).toEqual(['1', '2', '3']);
+  await page.screenshot({ path: 'output/playwright/group-selection.png', fullPage: true });
+  await page.mouse.move(box.x + 176, box.y + 160); await page.mouse.down();
+  await page.mouse.move(box.x + 256, box.y + 208, { steps: 10 }); await page.mouse.up();
+  const after = await modelPositions(page);
+  for (const id of [1, 2, 3]) {
+    expect(after[fixtureIssue(id).id].x - before[fixtureIssue(id).id].x).toBeCloseTo(100);
+    expect(after[fixtureIssue(id).id].y - before[fixtureIssue(id).id].y).toBeCloseTo(60);
+  }
+  for (const id of [4, 5, 6, 7, 8]) expect(after[fixtureIssue(id).id]).toEqual(before[fixtureIssue(id).id]);
+  await page.reload();
+  expect(await modelPositions(page)).toEqual(after);
+  expect(await selectedTickets(page)).toEqual([]);
+  expect(mock.updates).toHaveLength(0); expect(mock.connections).toHaveLength(0);
+});
+
+test('keeps a group and all live coordinates when refresh arrives during group dragging', async ({ page }) => {
+  const mock = await mockGitLab(page); await page.goto('/');
+  const box = await arrangeSelectionCards(page); await boxSelectFirstPair(page);
+  await page.mouse.move(box.x + 176, box.y + 160); await page.mouse.down();
+  await page.mouse.move(box.x + 224, box.y + 192, { steps: 8 });
+  const dragging = await modelPositions(page);
+  mock.workspace.issues.push(fixtureIssue(9));
+  await page.evaluate(() => (document.querySelector('button[title="Daten aus GitLab aktualisieren"]') as HTMLButtonElement).click());
+  await expect(results(page).getByRole('button')).toHaveCount(9);
+  const refreshed = await modelPositions(page);
+  for (const [id, point] of Object.entries(dragging)) expect(refreshed[id]).toEqual(point);
+  expect(await selectedTickets(page)).toEqual(['1', '2']);
+  await page.mouse.move(box.x + 256, box.y + 208, { steps: 6 }); await page.mouse.up();
+  const dropped = await modelPositions(page);
+  expect(dropped[fixtureIssue(1).id].x - dragging[fixtureIssue(1).id].x).toBeCloseTo(40);
+  expect(dropped[fixtureIssue(2).id].x - dragging[fixtureIssue(2).id].x).toBeCloseTo(40);
+  await page.reload(); expect(await modelPositions(page)).toEqual(dropped);
+});
+
+test('keeps the draft while extending a selection and restores the group when normal navigation is canceled', async ({ page }) => {
+  await mockGitLab(page); await page.goto('/?issue=1');
+  await page.getByRole('textbox', { name: 'Titel', exact: true }).fill('Unsaved draft');
+  const box = await arrangeSelectionCards(page); await boxSelectFirstPair(page);
+  await expect.poll(() => selectedTickets(page)).toEqual(['1', '2']);
+  await page.keyboard.down('Control'); await page.mouse.click(box.x + 176, box.y + 416); await page.keyboard.up('Control');
+  await expect.poll(() => selectedTickets(page)).toEqual(['1', '2', '4']);
+  await expect(page.getByRole('textbox', { name: 'Titel', exact: true })).toHaveValue('Unsaved draft');
+  page.once('dialog', dialog => dialog.dismiss());
+  await page.mouse.click(box.x + 440, box.y + 160);
+  await expect.poll(() => selectedTickets(page)).toEqual(['1', '2', '4']);
+  await expect(page.getByRole('textbox', { name: 'Titel', exact: true })).toHaveValue('Unsaved draft');
+  await page.getByRole('textbox', { name: 'Titel', exact: true }).press('Escape');
+  expect(await selectedTickets(page)).toEqual(['1', '2', '4']);
+  await page.keyboard.down('Control'); await page.mouse.click(box.x + 40, box.y + 40); await page.keyboard.up('Control');
+  expect(await selectedTickets(page)).toEqual(['1', '2', '4']);
+  await page.keyboard.press('Escape');
+  await expect.poll(() => selectedTickets(page)).toEqual([]);
+});
+
+test('clears group selection for filters and connection mode and excludes external references and edges', async ({ page }) => {
+  const mock = await mockGitLab(page);
+  mock.workspace.references.push({ id: 'external:1', iid: '99', title: 'External reference',
+    webUrl: `${TEST_TARGET.gitlabUrl}/other/project/-/issues/99` });
+  mock.workspace.relations.push({ id: 'external-edge', source: fixtureIssue(1).id, target: 'external:1', kind: 'relates_to' });
+  await page.goto('/'); const box = await arrangeSelectionCards(page);
+  await page.getByTestId('graph').evaluate(element => (element as any)._cyreg.cy.getElementById('external:1').position({ x: 550, y: 200 }));
+  await boxSelectFirstPair(page);
+  await expect.poll(() => selectedTickets(page)).toEqual(['1', '2']);
+  expect(await page.getByTestId('graph').evaluate(element => (element as any)._cyreg.cy.edges(':selected').length)).toBe(0);
+  await page.getByRole('searchbox', { name: 'Tickets durchsuchen', exact: true }).fill('#1');
+  await expect.poll(() => selectedTickets(page)).toEqual([]);
+  await page.getByRole('searchbox', { name: 'Tickets durchsuchen', exact: true }).fill('');
+  await expect(results(page).getByRole('button')).toHaveCount(8);
+  await arrangeSelectionCards(page); await boxSelectFirstPair(page);
+  await expect.poll(() => selectedTickets(page)).toEqual(['1', '2']);
+  await page.getByRole('button', { name: 'Verbinden', exact: true }).click();
+  await expect.poll(() => selectedTickets(page)).toEqual([]);
+  await page.keyboard.down('Control');
+  await page.mouse.click(box.x + 176, box.y + 160);
+  await page.mouse.click(box.x + 440, box.y + 160);
+  await page.keyboard.up('Control');
+  await expect(page.getByRole('dialog')).toBeVisible();
+  expect(await selectedTickets(page)).toEqual([]);
+  await expect(page.getByText('2 Tickets ausgewählt', { exact: true })).toHaveCount(0);
+  expect(mock.connections).toHaveLength(0);
+});
+
 test('keeps dragged positions after GitLab refresh adds or removes cards and browser reload', async ({ page }) => {
   const mock = await mockGitLab(page); await page.goto('/');
   const before = await modelPositions(page);
