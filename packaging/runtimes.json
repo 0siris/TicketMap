@@ -1,0 +1,14 @@
+{
+  "node": {
+    "version": "24.22.3",
+    "url": "https://nodejs.org/dist/v24.22.3/node-v24.22.3-win-x64.zip",
+    "sha256": "e612af99f626ab415ea225af6bce5c971feb448cb5cae250bb1c3fa50c5f7d9f",
+    "checksumsUrl": "https://nodejs.org/dist/v24.22.3/SHASUMS256.txt"
+  },
+  "glab": {
+    "version": "1.130.0",
+    "url": "https://gitlab.com/gitlab-org/cli/-/releases/v1.130.0/downloads/glab_1.130.0_windows_amd64.zip",
+    "sha256": "583e51e052d09960b8f1b33a787c50dab8498fb0529d22046c4a2fd94c22e4c8",
+    "checksumsUrl": "https://gitlab.com/gitlab-org/cli/-/releases/v1.130.0/downloads/checksums.txt"
+  }
+}

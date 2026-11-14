@@ -54,6 +54,8 @@ html, body { overscroll-behavior: none; }
 .connection > span { background: #518168; width: 6px; height: 6px; border-radius: 50%; }
 .connection.offline > span { background: #a84b35; }
 .status-strip { display: flex; flex-wrap: wrap; gap: 4px; padding: 0 26px 19px; }
+.app-update-notice { flex: none; flex-wrap: wrap; margin: 0 18px 12px; }
+.app-update-notice a { color: inherit; font-weight: 600; }
 .status-strip button { min-height: 30px; font-size: 11px; border-color: transparent; background: transparent; padding: 5px 9px; }
 .status-strip button.active { background: white; border-color: #c9d2c7; }
 .status-strip button strong { margin-left: 5px; font-size: 11px; color: #4a5d50; font-weight: 600; font-variant-numeric: tabular-nums; }

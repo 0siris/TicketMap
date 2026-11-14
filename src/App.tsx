@@ -10,6 +10,7 @@ import { ConnectionDialog } from './ConnectionDialog.js';
 import { GraphLegend } from './GraphLegend.js';
 import { CreateCardDialog } from './CreateCardDialog.js';
 import { QuickLabels } from './QuickLabels.js';
+import { AppUpdateNotice } from './AppUpdateNotice.js';
 
 const relationNames = { relates_to: 'Verknüpft', blocks: 'Blockierung', parent: 'Eltern / Unterticket', duplicate: 'Duplikat' };
 const stateNames = { network: 'Netz', themes: 'Themen', hierarchy: 'Hierarchie' };
@@ -166,6 +167,7 @@ export function App() {
         <button disabled={busy} onClick={() => void reload(true)} title="Daten aus GitLab aktualisieren" aria-label="Aktualisieren">
           <RefreshCw size={15} className={busy ? 'spinning' : ''} /><span>{busy ? 'Lädt …' : 'Aktualisieren'}</span></button></div>
     </header>
+    <AppUpdateNotice />
     {workspace && <nav className="status-strip" aria-label="Nach Status filtern">
       <button className={!state.filters.statuses.length ? 'active' : ''} onClick={() => filter('statuses', [])}>
         Alle Tickets <strong>{workspace.issues.length}</strong></button>

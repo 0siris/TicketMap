@@ -6,8 +6,16 @@ A local web application for a developer or project planner who works on a config
 The user needs to understand relationships and change a ticket without navigating between board columns and pages.
 
 The operator sets one GitLab origin and project through local configuration. No deployment target is part of the
-application source. The same build works with another configured target after a server restart. GitLab CLI owns
-the login.
+application source. The same build works with another configured target after a server restart. GitLab CLI provides
+the GitLab transport. Source checkouts can use its login; the portable launcher can also supply a locally encrypted token.
+
+Windows x64 users can download a portable ZIP with the required runtimes. First start collects the target and login;
+it needs no separate Node.js, npm, Git, or GitLab CLI installation. Settings and Windows-encrypted credentials stay
+in the package's local `data/` folder. Portable mode listens only on loopback.
+
+Application updates use the distribution's public GitHub release source. A newer stable version produces a download
+link. The user downloads and replaces the program manually while retaining `data/` and the browser origin. There is
+no automatic download or installation. Ticket synchronization with GitLab is independent of application updates.
 
 ## Product behavior
 
@@ -35,7 +43,7 @@ require an explicit action before loading. Failed images keep an accessible desc
 
 ## Constraints
 
-- Run on the host and its trusted LAN. Reuse the host's GitLab CLI login for all visitors.
+- Portable mode runs on the local computer. Source deployments can serve the host and its trusted LAN with a shared identity.
 - Keep real target configuration in the ignored `.env` or process environment. Commit only neutral example values.
 - Keep credentials out of the browser. Keep private ticket data out of external services.
 - Preserve drafts on request errors and conflict detection.

@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
-import { loadGitLabConfig } from '../server/config.js';
+import { loadGitLabConfig, loadRuntimeConfig } from '../server/config.js';
 
 describe('local GitLab configuration', () => {
   it('requires a host and namespace/project without a deployment fallback', () => {
@@ -47,6 +47,35 @@ describe('local GitLab configuration', () => {
         { cwd: new URL('..', import.meta.url), env, encoding: 'utf8' });
       expect(file.status).toBe(0);
       expect(JSON.parse(file.stdout)).toEqual({ gitlabUrl: 'https://file.example.com', project: 'file/project' });
+    } finally { unlinkSync(path); rmdirSync(directory); }
+  });
+});
+
+describe('portable runtime configuration', () => {
+  it('keeps source defaults and accepts a local alternate port for an isolated portable instance', () => {
+    expect(loadRuntimeConfig({})).toEqual({ host: '0.0.0.0', port: 4310 });
+    expect(loadRuntimeConfig({ TICKETMAP_BIND_HOST: '127.0.0.1', TICKETMAP_PORT: '4311' }))
+      .toEqual({ host: '127.0.0.1', port: 4311 });
+  });
+  it.each(['', '0', '-1', '65536', '4.5', '04310', 'localhost', '1e3'])('rejects an invalid listen port', port => {
+    expect(() => loadRuntimeConfig({ TICKETMAP_PORT: port })).toThrow('TICKETMAP_PORT');
+  });
+  it('rejects unsupported bind hosts', () => {
+    expect(() => loadRuntimeConfig({ TICKETMAP_BIND_HOST: 'attacker.example' })).toThrow('TICKETMAP_BIND_HOST');
+  });
+  it('uses a portable configuration file without reading or replacing checkout configuration', () => {
+    const directory = mkdtempSync(join(tmpdir(), 'ticket-map-portable-config-'));
+    const path = join(directory, '.env');
+    writeFileSync(path, 'GITLAB_URL=https://portable.example.com\nGITLAB_PROJECT=portable/project\n');
+    const env = { ...process.env, TICKETMAP_CONFIG_FILE: path };
+    delete (env as NodeJS.ProcessEnv).GITLAB_URL; delete (env as NodeJS.ProcessEnv).GITLAB_PROJECT;
+    const script = `import { loadLocalGitLabConfig } from './server/config.ts';
+      console.log(JSON.stringify(loadLocalGitLabConfig()));`;
+    try {
+      const result = spawnSync(process.execPath, ['--import', 'tsx', '--input-type=module', '-e', script],
+        { cwd: new URL('..', import.meta.url), env, encoding: 'utf8' });
+      expect(result.status).toBe(0);
+      expect(JSON.parse(result.stdout)).toEqual({ gitlabUrl: 'https://portable.example.com', project: 'portable/project' });
     } finally { unlinkSync(path); rmdirSync(directory); }
   });
 });

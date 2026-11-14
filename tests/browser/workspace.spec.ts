@@ -87,6 +87,42 @@ async function mockGitLab(page: Page, options: { conflict?: boolean; failure?: b
 }
 
 const results = (page: Page) => page.getByRole('list', { name: 'Tickets', exact: true });
+
+test('announces a manual application download without changing a draft or card positions', async ({ page }) => {
+  const api = await mockGitLab(page);
+  let available = false;
+  await page.route('**/api/app-update', route => route.fulfill({ json: available
+    ? { currentVersion: '0.2.0', available: true, latestVersion: '0.3.0',
+      downloadUrl: 'https://github.com/example/ticket-map/releases/tag/v0.3.0' }
+    : { currentVersion: '0.2.0', available: false } }));
+  await page.goto('/'); await openFirst(page);
+  const title = page.getByRole('textbox', { name: 'Titel', exact: true });
+  await title.fill('Unsaved update-check draft');
+  const before = await modelPositions(page);
+  available = true;
+  await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+  const download = page.getByRole('link', { name: 'Download öffnen', exact: true });
+  await expect(download).toHaveAttribute('href', 'https://github.com/example/ticket-map/releases/tag/v0.3.0');
+  await expect(download).toHaveAttribute('target', '_blank');
+  await expect(title).toHaveValue('Unsaved update-check draft');
+  expect(await modelPositions(page)).toEqual(before);
+  expect(api.updates).toHaveLength(0); expect(api.creations).toHaveLength(0);
+});
+
+test('keeps ticket work usable when application update checks fail or contain unsafe links', async ({ page }) => {
+  await mockGitLab(page);
+  await page.route('**/api/app-update', route => route.abort());
+  await page.goto('/'); await openFirst(page);
+  await expect(page.getByRole('link', { name: 'Download öffnen', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('alert')).toHaveCount(0);
+  await page.route('**/api/app-update', route => route.fulfill({ json: {
+    currentVersion: '0.2.0', available: true, latestVersion: '0.3.0', downloadUrl: 'https://attacker.example/download.exe',
+  } }));
+  await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+  await expect(page.getByRole('link', { name: 'Download öffnen', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('textbox', { name: 'Titel', exact: true })).toHaveValue('Treatment Viewer');
+  await expect(page.getByRole('alert')).toHaveCount(0);
+});
 async function openFirst(page: Page) {
   await results(page).getByRole('button', { name: /#1 Open Treatment Viewer/ }).click();
   await expect(page.getByRole('textbox', { name: 'Titel', exact: true })).toHaveValue('Treatment Viewer');

@@ -141,6 +141,9 @@ Drop on a card to choose its relationship; drop on blank canvas to create a conn
 Keep a visible **Neues Ticket** primary action in the header, including on phones. It opens the existing creation
 dialog without a source or relationship selector. Keep submission disabled while permissions load or creation completes.
 The creation form and quick label dialog use the same native dialog, explicit-save, and draft-protection conventions.
+Application-version updates use a small, non-blocking notification with the available version and a link to its GitHub
+release page. Do not download or install from that notification. Keep it separate from GitLab data refresh, preserve
+drafts and map state, and let ticket work continue when the release check fails.
 The graph footer has an accessible legend disclosure. Show each actual line/arrow style between example cards A and B,
 with a plain-language direction explanation. Keep the panel scrollable on phones and support Escape to close it.
 

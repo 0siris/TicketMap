@@ -80,3 +80,11 @@ export interface Filters {
   context: boolean;
 }
 export interface ViewState { view: View; filters: Filters; selected: string; theme: string; collapsed: string[]; overview: boolean }
+
+export interface ApplicationInfo { application: 'TicketMap'; version: string }
+export interface ApplicationUpdate {
+  currentVersion: string;
+  available: boolean;
+  latestVersion?: string;
+  downloadUrl?: string;
+}

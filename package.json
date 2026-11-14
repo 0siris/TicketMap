@@ -1,6 +1,6 @@
 {
   "name": "gitlab-ticket-map",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "concurrently -k -n api,web \"tsx watch server/main.ts\" \"vite --host 127.0.0.1\"",
     "build": "tsc --noEmit && vite build",
+    "build:portable": "node scripts/build-portable.mjs",
     "start": "tsx server/main.ts",
     "test": "vitest run",
     "test:e2e": "playwright test",

@@ -3,6 +3,7 @@ import { createApp } from '../server/app.js';
 import { fixture, issue, TEST_TARGET } from './fixtures.js';
 import { gitLabTargetKey } from '../shared/types.js';
 import { ServiceError } from '../server/glab.js';
+import { ApplicationUpdates } from '../server/updates.js';
 
 const apps: ReturnType<typeof createApp>[] = [];
 afterEach(async () => { await Promise.all(apps.splice(0).map(app => app.close())); });
@@ -21,6 +22,40 @@ const headers = { host: '127.0.0.1:4310', origin: 'http://127.0.0.1:4310',
 const payload = { expectedUpdatedAt: issue(1).updatedAt, title: 'New title' };
 
 describe('local API boundary', () => {
+  it('serves portable health and update metadata without accessing GitLab or accepting another origin', async () => {
+    const { service, imageLoader } = setup();
+    const fetchRelease = vi.fn(async () => Response.json({ draft: false, prerelease: false,
+      tag_name: 'v0.3.0', html_url: 'https://github.com/example/ticket-map/releases/tag/v0.3.0' }));
+    const app = createApp(service, { imageLoader, target: TEST_TARGET, port: 4311, developmentOrigins: false,
+      updates: new ApplicationUpdates({ version: '0.2.0', repository: 'example/ticket-map' }, fetchRelease) });
+    apps.push(app);
+    const host = { host: '127.0.0.1:4311' };
+    const info = await app.inject({ method: 'GET', url: '/api/app-info', headers: host });
+    expect(info.statusCode).toBe(200);
+    expect(info.json()).toEqual({ application: 'TicketMap', version: '0.2.0' });
+    const update = await app.inject({ method: 'GET', url: '/api/app-update', headers: host });
+    expect(update.json()).toMatchObject({ currentVersion: '0.2.0', available: true, latestVersion: '0.3.0' });
+    expect(service.workspace).not.toHaveBeenCalled();
+    for (const denied of [{ host: '127.0.0.1:4310' }, { host: '192.168.1.10:4311' },
+      { ...host, origin: 'http://127.0.0.1:5173' }, { ...host, origin: 'https://attacker.example' }]) {
+      const response = await app.inject({ method: 'GET', url: '/api/app-info', headers: denied });
+      expect(response.statusCode).toBe(403);
+    }
+  });
+  it('accepts normalized HTTP origins on the default HTTP port', async () => {
+    const { service, imageLoader } = setup();
+    const app = createApp(service, { imageLoader, target: TEST_TARGET, port: 80, developmentOrigins: false });
+    apps.push(app);
+    for (const host of ['127.0.0.1', '127.0.0.1:80']) {
+      const response = await app.inject({ method: 'PATCH', url: '/api/issues/1',
+        headers: { ...headers, host, origin: 'http://127.0.0.1' }, payload });
+      expect(response.statusCode).toBe(200);
+    }
+    const denied = await app.inject({ method: 'PATCH', url: '/api/issues/1',
+      headers: { ...headers, host: '127.0.0.1', origin: 'http://127.0.0.1:4310' }, payload });
+    expect(denied.statusCode).toBe(403);
+    expect(service.update).toHaveBeenCalledTimes(2);
+  });
   it('rejects missing and stale host/project target assertions before a mutation', async () => {
     const { app, service } = setup();
     for (const key of [undefined, gitLabTargetKey({ ...TEST_TARGET, project: 'other/project' }),

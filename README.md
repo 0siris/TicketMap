@@ -3,7 +3,53 @@
 A local visual workspace for a GitLab project that you configure. Explore tickets, labels, dependencies,
 and parent-child relationships. Edit a ticket without leaving the graph. The repository contains no deployment target.
 
-## Run
+## Portable Windows package
+
+Download `TicketMap-<version>-windows-x64.zip` from this repository's GitHub Releases page. Extract the whole ZIP to
+a writable folder, then double-click `TicketMap.cmd`. Windows x64, Windows PowerShell 5.1, and a browser are required.
+The package includes Node.js and GitLab CLI. You do not need to install Node.js, npm, Git, or GitLab CLI separately.
+
+The first start asks for your GitLab HTTPS origin and full namespace/project path. It uses a suitable existing
+GitLab CLI login when available. Otherwise, it asks for a GitLab access token through a protected console prompt.
+The token needs access to the project; use the `api` scope when you need ticket edits. GitLab still decides which
+actions your account can perform.
+
+The launcher saves the target in `data/.env`. A token entered through the launcher is encrypted in
+`data/credentials.dat` with Windows DPAPI for the current Windows user and machine. It is passed to the local server
+through its process environment, not through command-line arguments, browser settings, or the GitLab CLI's plaintext
+configuration. On another Windows account or machine, configure the login again. Do not share the `data/` folder.
+You can provide your own `data/.env` before the first start. Keep tokens out of that file.
+
+The launcher opens **http://127.0.0.1:4310** after the server is ready. The portable server accepts connections only
+from this computer. `StopTicketMap.cmd` stops the server started from that package. `ConfigureTicketMap.cmd` stops
+that server and starts setup again. Save or discard unsaved edits before stopping or reconfiguring the application.
+An unrelated process on the same port is not stopped.
+
+### Manual updates
+
+The distributed application checks its configured GitHub release source when opened and about every six hours while
+visible. When a newer stable version is available, a notification links to its release page. TicketMap does not
+download or install an update. A failed update check does not stop GitLab work. GitLab ticket refresh is separate
+from this application-version check.
+
+To update:
+
+1. Save or discard unsaved edits and run `StopTicketMap.cmd`.
+2. Download and extract the new ZIP into a new folder.
+3. Copy your existing `data/` folder into the new folder. Do not copy the old `app/` or `runtime/` folders.
+4. Start the new `TicketMap.cmd`. Keep the same browser profile, address, port, and GitLab target to retain map layouts.
+
+Alternatively, replace the program files in the existing folder while the server is stopped and keep `data/` intact.
+Map layouts are in browser storage, not in the package's `data/` folder. A LAN address used by a source checkout and
+the portable loopback address have separate browser layouts.
+
+Each release includes `SHA256SUMS`. You can compare the downloaded ZIP's SHA-256 with that file before extracting it:
+
+```powershell
+Get-FileHash -Algorithm SHA256 .\TicketMap-<version>-windows-x64.zip
+```
+
+## Run from source
 
 Requirements: Node.js 24 or later, npm, Git, and [GitLab CLI](https://docs.gitlab.com/cli/).
 The GitLab CLI account needs access to your configured project. GitLab decides which edits that account can make.
@@ -75,6 +121,19 @@ Use an existing CLI login when one is already available. The application also fi
 at `%LOCALAPPDATA%\Programs\glab\glab.exe`, even when that directory is absent from `PATH`.
 For another location, set the optional `GLAB_PATH` environment variable or `.env` entry to the executable path.
 
+The portable launcher supplies these optional runtime settings. Source runs keep their existing defaults:
+
+| Setting | Purpose | Source default |
+| --- | --- | --- |
+| `TICKETMAP_CONFIG_FILE` | Path to the local target `.env` file | Repository-root `.env` |
+| `TICKETMAP_BIND_HOST` | Listener address: `127.0.0.1` or `0.0.0.0` | `0.0.0.0` |
+| `TICKETMAP_PORT` | Local listener port | `4310` |
+| `TICKETMAP_DISTRIBUTION_FILE` | Path to generated application-version and release-source metadata | None; no release check |
+
+The portable launcher uses its own `data/.env`, bundled CLI, loopback listener, and distribution metadata. These settings
+do not put the GitLab target into the frontend build. Changing the listener address or port changes the browser origin
+and therefore selects separate browser map storage.
+
 For development, run `npm run dev` and open **http://127.0.0.1:5173**. This starts the API and Vite together.
 Vite forwards `/api` requests to port 4310. Stop a running production instance before starting development.
 
@@ -92,7 +151,7 @@ Callers cannot select another target through an API request. One server process 
 there is no project picker.
 
 The committed `.env.example` contains placeholders only. Keep real deployment values in the ignored `.env` or the
-process environment. Keep GitLab credentials in the CLI's credential storage. Tests use synthetic targets and do not
+process environment. Keep source-checkout credentials in the CLI's credential storage. Tests use synthetic targets and do not
 need your local configuration or GitLab login.
 
 ## Use the workspace
@@ -260,6 +319,8 @@ Shared contracts are in `shared/types.ts`.
 
 | Endpoint | Purpose |
 | --- | --- |
+| `GET /api/app-info` | Local application identity and version, without reading GitLab |
+| `GET /api/app-update` | Cached availability and release-page link for a newer stable application version |
 | `GET /api/workspace` | Snapshot of tickets, labels, statuses, references, and typed edges |
 | `GET /api/workspace?refresh=1` | Request a fresh snapshot |
 | `GET /api/issues/:iid` | Fresh ticket details and edit permissions |
@@ -281,6 +342,44 @@ Independent creation requires `operationId`, `title`, `description`, and `labelI
 relationship, type, or project fields. Connected creation requires `operationId` (UUID), `expectedSourceUpdatedAt`, `title`, `description`, `labelIds`, and `kind`.
 Kinds are `subtask`, `relates_to`, `blocks`, and `is_blocked_by`. The server chooses the allowed type and configured project.
 Success returns `{ workspace, createdIid }`. The browser cannot supply arbitrary type or project IDs.
+
+## Build and publish a portable release
+
+Maintainers need the source-checkout prerequisites and Windows x64. Build from a clean, committed checkout whose
+`package.json` version is the intended release version. Keep the matching root version in `package-lock.json` aligned.
+
+```powershell
+npm ci
+npm run build
+npm test
+npm run build:portable
+```
+
+The portable build compiles the server and installs only production dependencies into a fresh staging directory.
+It downloads pinned official Node.js and GitLab CLI archives and verifies their SHA-256 checksums. The archive uses
+an explicit file list. It does not include `.git`, `.env`, `data/`, local logs, screenshots, or an existing dependency
+installation. Runtime provenance and third-party license notices are included in the package.
+
+The output is `release/TicketMap-<version>-windows-x64.zip` and `release/SHA256SUMS`. Build staging and download caches
+also stay under ignored `release/`. The distribution manifest gets its application version from `package.json` and
+its GitHub release repository from the checkout's Git remote. It must never contain a GitLab target or credential.
+
+Before publication, extract the ZIP into a separate folder and test first start, a preconfigured target, stop/restart,
+and a manual update that preserves `data/`. Do not test with live ticket writes. Check the archive inventory and the
+release checksums. A successful source build does not prove the packaged launchers work.
+
+After checking the package, use GitHub CLI to publish it to the repository selected by the current checkout:
+
+```powershell
+$version = (Get-Content -Raw package.json | ConvertFrom-Json).version
+$tag = "v$version"
+git tag $tag
+git push origin $tag
+gh release create $tag "release/TicketMap-$version-windows-x64.zip" release/SHA256SUMS --verify-tag --title "TicketMap $version" --generate-notes
+```
+
+Review the Git remote and release notes before publishing. A release tag must match the package version. Never upload
+an extracted folder after configuring it; its `data/` folder contains private settings and encrypted credentials.
 
 ## Verify
 
@@ -319,7 +418,8 @@ project data. Do not publish them.
 
 ## Boundaries
 
-This version supports one shared GitLab identity and one configured project on a trusted LAN. It does not create labels,
+The portable package serves one local GitLab identity and one configured project on loopback. Source deployments can
+use the host's shared identity on a trusted LAN. The application does not create labels,
 change or delete existing relationships, move existing hierarchy items, maintain independent clusters, or provide team hosting.
 Topic labels must already exist in GitLab.
 There is no MCP server dependency, AI classification, webhook receiver, background sync service, or remote deployment.

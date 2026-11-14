@@ -8,18 +8,23 @@ import type { ConnectionInput, CreateConnectedInput, CreateIssueInput, IssuePatc
 import { gitLabTargetKey, type GitLabTarget } from '../shared/types.js';
 import type { ImageDownload } from './images.js';
 import { validUpload } from '../shared/images.js';
+import { ApplicationUpdates } from './updates.js';
 
 export function createApp(service: Pick<GitLabService, 'workspace' | 'issue' | 'update' | 'connect' | 'creationOptions' | 'createConnected' | 'createIssue'>,
-  { lanAddresses = [], imageLoader, target }:
-  { lanAddresses?: string[]; imageLoader: (secret: string, filename: string) => Promise<ImageDownload>; target: GitLabTarget }) {
+  { lanAddresses = [], imageLoader, target, port = 4310, updates, developmentOrigins = true }:
+  { lanAddresses?: string[]; imageLoader: (secret: string, filename: string) => Promise<ImageDownload>;
+    target: GitLabTarget; port?: number; updates?: ApplicationUpdates; developmentOrigins?: boolean }) {
   const app = Fastify({ logger: false, bodyLimit: 2_000_000,
     ajv: { customOptions: { removeAdditional: false, coerceTypes: false } } });
   const hosts = new Set(['127.0.0.1', 'localhost', ...lanAddresses]);
-  const origins = new Set([...hosts].map(host => `http://${host}:4310`)
-    .concat(['http://127.0.0.1:5173', 'http://localhost:5173']));
+  const origins = new Set([...hosts].map(host => new URL(`http://${host}:${port}`).origin)
+    .concat(developmentOrigins ? ['http://127.0.0.1:5173', 'http://localhost:5173'] : []));
   app.addHook('onRequest', async (request, reply) => {
-    const hostname = request.headers.host?.split(':')[0];
-    if (!hostname || !hosts.has(hostname))
+    let host: URL | undefined;
+    try { host = request.headers.host ? new URL(`http://${request.headers.host}`) : undefined; }
+    catch { /* Malformed authorities are rejected below. */ }
+    if (!host || !hosts.has(host.hostname) || Number(host.port || 80) !== port ||
+        host.username || host.password || host.pathname !== '/' || host.search || host.hash)
       return reply.code(403).send({ message: 'Zugriff nur über eine lokale Adresse dieses Rechners erlaubt.' });
     if (request.headers.origin && !origins.has(request.headers.origin))
       return reply.code(403).send({ message: 'Diese Herkunft ist nicht erlaubt.' });
@@ -41,6 +46,10 @@ export function createApp(service: Pick<GitLabService, 'workspace' | 'issue' | '
       return reply.code(400).send({ message: 'Die Eingaben sind ungültig. Bitte prüfen.' });
     return reply.code(500).send({ message: 'Die Anfrage ist fehlgeschlagen. Bitte erneut versuchen.' });
   });
+  if (updates) {
+    app.get('/api/app-info', async () => updates.info);
+    app.get('/api/app-update', async () => updates.check());
+  }
   app.get<{ Querystring: { refresh?: string } }>('/api/workspace', async request =>
     service.workspace(request.query.refresh === '1'));
   app.get<{ Params: { secret: string; filename: string } }>('/api/images/:secret/:filename', {
