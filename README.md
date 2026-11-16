@@ -5,6 +5,8 @@ and parent-child relationships. Edit a ticket without leaving the graph. The rep
 
 ## Portable Windows package
 
+See the illustrated [German user guide](docs/user-guide.md) for first-time setup, login, and manual updates.
+
 Download `TicketMap-<version>-windows-x64.zip` from this repository's GitHub Releases page. Extract the whole ZIP to
 a writable folder, then double-click `TicketMap.cmd`. Windows x64, Windows PowerShell 5.1, and a browser are required.
 The package includes Node.js and GitLab CLI. You do not need to install Node.js, npm, Git, or GitLab CLI separately.
